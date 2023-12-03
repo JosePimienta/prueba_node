@@ -1,13 +1,33 @@
 const http = require('node:http')
+const fs = require('node:fs')
 
 const desiredPort = process.env.PORT ?? 1234
 
-const server = http.createServer((req, res) => {
-    console.log('Request received')
-    res.end('Hola mundo')
-})
-
-
-    server.listen(desiredPort, () => {
-        console.log(`server listening on port http://localhost:${desiredPort}`)
+const processRequest = (req, res) => {
+  res.setHeader('Content-type', 'text/html; charset=utf-8')
+  if (req.url === '/') {
+    res.statusCode = 200
+    res.end('<h1>Estás en la página de INICIO</h1>')
+  } else if (req.url === '/contacto') {
+    res.statusCode = 200
+    res.end('<h1>Estás en la página de CONTACTO</h1>')
+  } else if (req.url === '/imagen.jpeg') {
+    fs.readFile('./imgg.jpeg', (err, data) => {
+      if (err) {
+        res.statusCode = 500
+        res.end('<h1>Erro 500 Internal Server Error</h1>')
+      } else {
+        res.setHeader('Content-type', 'image/jpeg')
+        res.end(data)
+      }
     })
+  } else {
+    res.statusCode = 404
+    res.end('<h1>Error 404</h1>')
+  }
+}
+const server = http.createServer(processRequest)
+
+server.listen(desiredPort, () => {
+  console.log(`server listening on port http://localhost:${desiredPort}`)
+})
